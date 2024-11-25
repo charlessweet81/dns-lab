@@ -26,110 +26,144 @@ Let's dive in.
 
 <h2>Overview</h2>
 
-  - Part I: Configuring Active Directory Group Policy 
-    - Step 1: Open Group Policy Management Console (GPMC) 
-    - Step 2: Create/Edit Group Policy Object (GPO)
-    - Step 3: Navigate to the Account Lockout Policy Settings 
-    - Step 4: Configure Account Lockout Policy Settings
-    - Step 5: Force Update Group Policy
-    - Step 6: Observe Lockout via Remote Desktop
-    - Step 7: Unlock the Account
-    - Step 8: Reset the Password
-  - Part II: Disabling & Re-enabling Accounts
-    - Step 1: Step 1: Disable the Account
-    - Step 2: Re-enable the Account
+  - Part I: A-Record Exercise
+    - Step 1: Log into DC-1
+    - Step 2: Log into Client-1
+    - Step 3: Ping "mainframe" from Client-1
+    - Step 4: Create an A-Record on DC-1
+    - Step 5: Ping "mainframe" from Client-1
+  - Part II: Local DNS Cache Exercise
+    - Step 1: Update "mainframe" A-Record on DC-1
+    - Step 2: Ping "mainframe" from Client-1
+    - Step 3: View Local DNS Cache
+    - Step 4: Flush the DNS Cache
+    - Step 5: Verify Empty Cache
+    - Step 6: Ping "mainframe" Again
+  - Part III: CNAME Record Exercise
+    - Create a CNAME Record on DC-1
+    - Ping "search" from Client-1
+    - Nslookup for "search" on Client-1
+    - 
 
-<h2>Steps</h2>
-<h3>Part I: Configuring Active Directory Group Policy</h3>
+<h2>Exercise Steps</h2>
+<h3>Part I: A-Record Exercise</h3>
 
-<h4>Step 1: Open Group Policy Management Console (GPMC) </h4>
+<h4>Step 1: Log into DC-1</h4>
 
-<img src="https://i.imgur.com/6EhRwko.png" height="80%" width="80%" alt=""/>
+<img src="https://i.imgur.com/nTMpYVh.png" height="80%" width="80%" alt=""/>
 
-- Open Group Policy Management Console (GPMC):
-  - Log in to a domain controller with administrative privileges.
-  - Press Win + R, type gpmc.msc, and hit Enter.
+- Open Remote Desktop Connection on your local machine or Azure interface.
+- Enter the credentials for mydomain.com\jane_admin (e.g., username: jane_admin, password: [your password]).
+- Connect to DC-1.
 
-<h4>Step 2: Create or Edit a Group Policy Object (GPO):</h4>
+<h4>Step 2: Log into Client-1</h4>
 
-<img src="https://i.imgur.com/TqDhhN8.png" height="80%" width="80%" alt=""/>
+<img src="https://i.imgur.com/nTMpYVh.png" height="80%" width="80%" alt=""/>
 
-- Navigate to your domain in the GPMC.
-- Right-click on the domain or an Organizational Unit (OU) where you want to apply the policy and select Create a GPO in this domain, and Link it here... or edit an existing GPO.
+- Open Remote Desktop Connection on your local machine or Azure interface.
+- Enter the credentials for mydomain.com\jane_admin (e.g., username: jane_admin, password: [your password]).
+- Connect to Client-1.
+  
+<h4>Step 3: Ping "mainframe" from Client-1</h4>
 
+<img src="https://i.imgur.com/HPGrSp5.png" height="80%" width="80%" alt=""/>
 
-<h4>Step 3: Navigate to the Account Lockout Policy Settings </h4>
+- Open a Command Prompt on Client-1 and type:
+  - ping mainframe
 
-<img src="https://i.imgur.com/EDn6w7S.png" height="80%" width="80%" alt=""/>
+Observation: The ping will fail because "mainframe" doesn't have a DNS record.
 
-- Computer Configuration -> Policies -> Windows Settings -> Security Settings -> Account Policies -> Account Lockout Policy
+<h4>Step 4: Create an A-Record on DC-1</h4>
 
-<h4>Step 4: Configure Account Lockout Policy Settings </h4>
+<img src="https://i.imgur.com/hPFLhH7.png" height="80%" width="80%" alt=""/>
 
-<img src="https://i.imgur.com/Jkx5zKj.png" height="80%" width="80%" alt=""/>
-
-- Configure the following settings:
-  - Account lockout threshold: Set to 5 invalid login attempts.
-  - Account lockout duration: Set to 30 minutes (or your preference).
-  - Reset account lockout counter after: Set to 10 minutes.
-  - Save and close the GPO editor.
-- Force the policy update:
-  - Run gpupdate /force on the Domain Controller and the client machine.
+- Type 'DNS' in dock search bar to open DNS Manager
+- Click DC-1 > Forward Lookup Zones > MyDomain.com
+- Right-click and choose New Host (A or AAAA)
+- Enter DNS (e.g. 10.0.0.6)
+- Click 'Add Host'
  
-<h4>Step 5: Force Update Group Policy</h4>
+<h4>Step 5: Ping "mainframe" from Client-1</h4>
 
-<img src="https://i.imgur.com/1i90Xk4.png" height="80%" width="80%" alt=""/>
+<img src="https://i.imgur.com/E9Qm8Ci.png" height="80%" width="80%" alt=""/>
 
-- You can wait ~90 minutes for the group policy to update itself or manually force the group policy to update.
-  - Login to Client-1 as an admin
-  - Open Command Prompt and type 'gpudate /force'
+In Powershell, ping 'mainframe'.
+
+<h3>Part II: Local DNS Cache Exercise</h3> 
+
+<h4>Step 1: Ping "mainframe" from Client-1</h4>
+
+<img src="https://i.imgur.com/k3QJGSL.png" height="80%" width="80%" alt=""/>
+
+- Return to DC-1 and modify the "mainframe" DNS record:
+  - Change the IP address to 8.8.8.8.
+  - Save the updated record.
  
-<h4> Step 6: Observe Lockout via Remote Desktop</h4>
-<img src="https://i.imgur.com/WNhQXTJ.png" height="80%" width="80%" alt=""/>
+<h4>Step 2: Ping "mainframe" from Client-1</h4>
 
-- Try logging in with an incorrect password enough times to trigger lockout
+<img src="https://i.imgur.com/jGjoS8f.png" height="80%" width="80%" alt=""/>
 
-<h4>Step 6: Observe the Ticket Lockout in Active Directory</h4>
+- On Client-1, execute:
+  - Copy code
+  - ping mainframe
 
-<img src="https://i.imgur.com/WNhQXTJ.png" height="80%" width="80%" alt=""/>
+Observation: The ping still resolves to the old IP address (the local DNS cache still holds the previous record).
 
-- In ADUC, navigate to the locked account:
-- Locate the user (e.g., johndoe) > Double-click the account.
-- Observe that the account is locked (status shown in the account properties).
-- Note the "Account is locked out" checkbox.
+<h4>Step 3: View Local DNS Cache:</h4>
 
-<h4>Step 7: Unlock the Account</h4>
+<img src="https://i.imgur.com/d43QULl.png" height="80%" width="80%" alt=""/>
 
-<img src="https://i.imgur.com/HfQeAYK.png" height="80%" width="80%" alt=""/>
+- Check the local DNS cache on Client-1:
+  - ipconfig /displaydns
 
-- In ADUC, unlock the account:
-  - Right-click the user > Click Properties > Go to the Account tab.
-  - Uncheck Account is locked out and click OK.
- 
-<h4>Step 8: Reset the Password</h4>
+Observation: The cached record for "mainframe" will show the old IP address.
 
-<img src="https://i.imgur.com/Z8WZjHH.png" height="80%" width="80%" alt=""/>
+<h4>Step 4: Flush the DNS Cache</h4>
 
-- Reset the user’s password:
-- Right-click the user in ADUC > Click Reset Password.
-- Enter a new password and click OK.
+<img src="https://i.imgur.com/Y9YCaPl.png" height="80%" width="80%" alt=""/>
 
-<h3> Part II: Enabling & Disabling Accounts </h3>
-<h4>Step 1: Disable the Account</h4>
+- Open Powershell as admin
+  - ipconfig /flushdns
 
-<img src="https://i.imgur.com/F3DQ7yv.png" height="80%" width="80%" alt=""/>
+Observation: The cache is now cleared.
 
-- In ADUC, disable the account:
-  - Right-click the user > Click Disable Account.
-- Test login:
-  - Attempt to log in with the disabled account on a client machine.
-  - Observe the error message: "Your account has been disabled. Please contact your administrator."
+<h4>Step 5: Ping "mainframe" Again</h4>
 
-<h4>Step 2: Re-enable the Account</h4>
+<img src="https://i.imgur.com/lhLAkx4.png" height="80%" width="80%" alt=""/>
 
-<img src="https://i.imgur.com/fhNbn9G.png" height="80%" width="80%" alt=""/>
+- Attempt another ping to "mainframe":
+  - ping mainframe
 
-- In ADUC, re-enable the account:
-  - Right-click the user > Click Enable Account.
-- Test login:
-  - Log in with the account to confirm it works.
+Observation: The ping now resolves to the updated IP address 8.8.8.8.
+
+<h3>C-Name Record Exercise</h3>
+
+<h4> Step 1: Create a CNAME Record on DC-1</h4>
+
+<img src="https://i.imgur.com/PQa3i7a.png" height="80%" width="80%" alt=""/>
+
+- Return to DC-1.
+- Open DNS Manager.
+- Navigate to the forward lookup zone.
+- Add a CNAME Record:
+  - Alias Name: search
+  - Target Host: www.google.com
+- Save the record.
+
+<h4> Step 2: Ping "search" from Client-1</h4>
+
+<img src="https://i.imgur.com/TxtxgJU.png" height="80%" width="80%" alt=""/>
+
+- Go back to Client-1 and execute:
+  - ping search
+
+Observation: The ping resolves to the IP address of www.google.com, as per the CNAME record.
+
+<h4> Step 3: Nslookup for "search" on Client-1</h4>
+
+<img src="https://i.imgur.com/amNn5Sl.png" height="80%" width="80%" alt=""/>
+
+- On Client-1, type:
+  - nslookup search
+
+Observation: The result shows the alias "search" pointing to www.google.com.
