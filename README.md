@@ -43,7 +43,10 @@ Let's dive in.
     - Create a CNAME Record on DC-1
     - Ping "search" from Client-1
     - Nslookup for "search" on Client-1
-    - 
+  - Part III: C-Name Record Exercise
+    - Step 1: Create a CNAME Record on DC-1
+    - Step 2: Ping "search" from Client-1
+    - Step 3: Nslookup for "search" on Client-1
 
 <h2>Exercise Steps</h2>
 <h3>Part I: A-Record Exercise</h3>
@@ -136,7 +139,7 @@ Observation: The cache is now cleared.
 
 Observation: The ping now resolves to the updated IP address 8.8.8.8.
 
-<h3>C-Name Record Exercise</h3>
+<h3>Part III: C-Name Record Exercise</h3>
 
 <h4> Step 1: Create a CNAME Record on DC-1</h4>
 
